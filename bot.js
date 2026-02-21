@@ -791,7 +791,10 @@ bot.use(async (ctx, next) => {
       ctx.callbackQuery?.data === 'verify_user' ||
       ctx.session?.isAdmin ||
       ctx.message?.new_chat_members ||
-      ctx.message?.left_chat_member) {
+      ctx.message?.left_chat_member ||
+      ctx.message?.forward_date ||
+      ctx.message?.forward_from ||
+      ctx.message?.forward_from_chat) {
     return next();
   }
   
@@ -811,7 +814,19 @@ bot.use(async (ctx, next) => {
       ctx.session.lastVerificationCheck = now;
       return next();
     } else {
+      // ইউজার যদি OTP group বা Chat group এর admin/creator হয় তাহলে skip
+      try {
+        const otpMember = await ctx.telegram.getChatMember(OTP_GROUP_ID, ctx.from.id);
+        const chatMember = await ctx.telegram.getChatMember(CHAT_GROUP_ID, ctx.from.id);
+        if (['administrator', 'creator'].includes(otpMember.status) || 
+            ['administrator', 'creator'].includes(chatMember.status)) {
+          ctx.session.verified = true;
+          return next();
+        }
+      } catch(e) {}
+
       // শুধু private chat এ verification message পাঠাও
+      // গ্রুপ থেকে trigger হলে কোনো message পাঠাবে না
       if (ctx.chat && ctx.chat.type === 'private') {
         await safeReply(ctx,
           "❌ *Verification Required*\n\n" +
