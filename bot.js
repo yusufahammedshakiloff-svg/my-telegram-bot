@@ -746,7 +746,13 @@ bot.action("verify_user", async (ctx) => {
 /******************** VERIFICATION CHECK MIDDLEWARE ********************/
 bot.use(async (ctx, next) => {
   // শুধু private chat এ verification check করো
+  // Group, supergroup, channel এ ignore করো
   if (ctx.chat && ctx.chat.type !== 'private') {
+    return next();
+  }
+
+  // OTP group বা Chat group থেকে আসলে ignore করো
+  if (ctx.chat && (ctx.chat.id === OTP_GROUP_ID || ctx.chat.id === CHAT_GROUP_ID)) {
     return next();
   }
 
