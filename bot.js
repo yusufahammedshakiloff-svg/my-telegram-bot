@@ -220,6 +220,10 @@ async function safeForwardMessage(fromChatId, toUserId, messageId) {
 
 async function safeReply(ctx, text, options = {}) {
   try {
+    // গ্রুপে কখনো reply করবে না — শুধু private chat এ
+    if (ctx.chat && ctx.chat.type !== 'private') {
+      return null;
+    }
     return await ctx.reply(text, options);
   } catch (error) {
     if (error.description && error.description.includes('blocked by the user')) {
