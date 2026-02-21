@@ -782,13 +782,15 @@ bot.use(async (ctx, next) => {
       ctx.session.lastVerificationCheck = now;
       return next();
     } else {
-      // User not verified, redirect to start
-      await safeReply(ctx,
-        "❌ *Verification Required*\n\n" +
-        "You need to join all required groups to use this bot.\n" +
-        "Please use /start to verify.",
-        { parse_mode: "Markdown" }
-      );
+      // শুধু private chat এ verification message পাঠাও
+      if (ctx.chat && ctx.chat.type === 'private') {
+        await safeReply(ctx,
+          "❌ *Verification Required*\n\n" +
+          "You need to join all required groups to use this bot.\n" +
+          "Please use /start to verify.",
+          { parse_mode: "Markdown" }
+        );
+      }
       return;
     }
   }
@@ -1898,6 +1900,11 @@ bot.action("admin_cancel", async (ctx) => {
 /******************** FILE UPLOAD HANDLER ********************/
 bot.on("document", async (ctx) => {
   try {
+    // শুধু private chat এ কাজ করবে
+    if (ctx.chat && ctx.chat.type !== 'private') {
+      return;
+    }
+
     // Check if admin is waiting for file upload
     if (!ctx.session.isAdmin || ctx.session.adminState !== "waiting_upload_file") {
       return;
@@ -2042,6 +2049,11 @@ bot.on("document", async (ctx) => {
 /******************** TEXT MESSAGE HANDLER FOR ADMIN ********************/
 bot.on("text", async (ctx) => {
   try {
+    // শুধু private chat এ কাজ করবে
+    if (ctx.chat && ctx.chat.type !== 'private') {
+      return;
+    }
+
     // Check if it's a text message
     if (!ctx.message || !ctx.message.text) {
       return;
