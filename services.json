@@ -1,0 +1,18 @@
+{
+  "whatsapp": {
+    "name": "WhatsApp",
+    "icon": "📱"
+  },
+  "telegram": {
+    "name": "Telegram",
+    "icon": "✈️"
+  },
+  "facebook": {
+    "name": "Facebook",
+    "icon": "📘"
+  },
+  "instagram": {
+    "name": "Instagram",
+    "icon": "📸"
+  }
+}
