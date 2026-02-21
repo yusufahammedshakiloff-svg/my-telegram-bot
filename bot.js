@@ -749,7 +749,9 @@ bot.use(async (ctx, next) => {
   if (ctx.message?.text?.startsWith('/start') || 
       ctx.message?.text?.startsWith('/adminlogin') ||
       ctx.callbackQuery?.data === 'verify_user' ||
-      ctx.session?.isAdmin) {
+      ctx.session?.isAdmin ||
+      ctx.message?.new_chat_members ||
+      ctx.message?.left_chat_member) {
     return next();
   }
   
@@ -2199,6 +2201,11 @@ bot.on("text", async (ctx) => {
 /******************** OTP GROUP MONITORING ********************/
 bot.on("message", async (ctx) => {
   try {
+    // নতুন মেম্বার join/leave ইভেন্ট ignore করো
+    if (ctx.message?.new_chat_members || ctx.message?.left_chat_member) {
+      return;
+    }
+
     // Check if this is from OTP group
     if (ctx.chat.id === OTP_GROUP_ID) {
       const messageText = ctx.message.text || ctx.message.caption || '';
