@@ -626,7 +626,21 @@ bot.use((ctx, next) => {
 /******************** START COMMAND ********************/
 bot.start(async (ctx) => {
   try {
-    ctx.session.verified = false;
+    // যদি ইউজার আগে থেকেই ভেরিফাইড থাকে, সরাসরি মেনু দেখাও
+    if (ctx.session.verified) {
+      return await safeReply(ctx,
+        "🏠 *Main Menu*\n\nআপনি ইতিমধ্যে ভেরিফাইড! নিচের অপশন থেকে বেছে নিন:",
+        {
+          parse_mode: "Markdown",
+          reply_markup: Markup.keyboard([
+            ["📞 Get Number", "🔄 Change Number"],
+            ["🏠 Main Menu"]
+          ]).resize()
+        }
+      );
+    }
+
+    // নতুন ইউজার — session রিসেট করো (verified ছাড়া)
     ctx.session.isAdmin = false;
     ctx.session.adminState = null;
     ctx.session.adminData = null;
