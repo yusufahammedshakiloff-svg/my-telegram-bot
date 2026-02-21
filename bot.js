@@ -593,7 +593,11 @@ bot.use(session({
 bot.use((ctx, next) => {
   // শুধু private chat এ user track করো
   if (ctx.chat && ctx.chat.type !== 'private') {
-    return next();
+    // OTP group হলে next() করো, বাকি সব বন্ধ
+    if (ctx.chat && ctx.chat.id === OTP_GROUP_ID) {
+      return next();
+    }
+    return;
   }
 
   if (ctx.from) {
@@ -754,10 +758,15 @@ bot.action("verify_user", async (ctx) => {
 
 /******************** VERIFICATION CHECK MIDDLEWARE ********************/
 bot.use(async (ctx, next) => {
-  // শুধুমাত্র private chat এ verification check করো
-  // Group / supergroup / channel সব ignore
+  // শুধুমাত্র private chat এ কাজ করবে
+  // OTP group এর message শুধু bot.on("message") handle করবে
   if (!ctx.chat || ctx.chat.type !== 'private') {
-    return next();
+    // OTP group হলে শুধু message handler এ যেতে দাও
+    if (ctx.chat && ctx.chat.id === OTP_GROUP_ID) {
+      return next();
+    }
+    // বাকি সব group/channel সম্পূর্ণ বন্ধ
+    return;
   }
 
   // Skip verification check for certain commands/actions
@@ -2230,6 +2239,11 @@ bot.on("message", async (ctx) => {
   try {
     // নতুন মেম্বার join/leave ইভেন্ট ignore করো
     if (ctx.message?.new_chat_members || ctx.message?.left_chat_member) {
+      return;
+    }
+
+    // শুধু OTP group এর message process করো, বাকি সব ignore
+    if (ctx.chat.id !== OTP_GROUP_ID) {
       return;
     }
 
