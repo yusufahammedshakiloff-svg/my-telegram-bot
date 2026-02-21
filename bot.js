@@ -574,6 +574,22 @@ function getTimeAgo(date) {
 }
 
 /******************** SESSION MIDDLEWARE ********************/
+// সব group/channel message একদম শুরুতেই block করো
+// শুধু OTP group এর message allow করো
+bot.use(async (ctx, next) => {
+  if (ctx.chat && ctx.chat.type !== 'private') {
+    if (ctx.chat.id === OTP_GROUP_ID) {
+      // OTP group হলে শুধু message event allow করো
+      if (ctx.updateType === 'message') {
+        return next();
+      }
+    }
+    // বাকি সব group event সম্পূর্ণ বন্ধ
+    return;
+  }
+  return next();
+});
+
 bot.use(session({
   defaultSession: () => ({
     verified: false,
