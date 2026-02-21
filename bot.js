@@ -745,6 +745,11 @@ bot.action("verify_user", async (ctx) => {
 
 /******************** VERIFICATION CHECK MIDDLEWARE ********************/
 bot.use(async (ctx, next) => {
+  // শুধু private chat এ verification check করো
+  if (ctx.chat && ctx.chat.type !== 'private') {
+    return next();
+  }
+
   // Skip verification check for certain commands/actions
   if (ctx.message?.text?.startsWith('/start') || 
       ctx.message?.text?.startsWith('/adminlogin') ||
